@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>
+		Jogo da velha
+	</title>
+	 <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+ 
+	<script type="text/javascript" src="scriptVelhaSala.js"></script>
+
+</head>
+<body>
+
+<table>
+	<tr>
+		<td>
+			<font>Usuário: </font>
+		</td>
+		<td>
+			<b><font id="usuarioSala"></font></b>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<font>Seu código de sala é: </font>
+		</td>
+		<td>
+			<b><font id="roomCode"></font></b>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<input type="text" id="typeCode" placeholder="Digite o código do amigo">
+		</td>
+		<td>
+			<button id="pesquisar">Pesquisar</button>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<font>Você está na sala: </font>
+		</td>
+		<td>
+			<font id="salamudada"></font>
+		</td>
+	</tr>
+</table>
+<br>
+<br>
+<br>
+<br>
+<table>
+	<tr>
+		<td>
+			<font id="texto1">TEXTO 1</font>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<font id="texto2">TEXTO 2</font>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<font id="texto3">TEXTO 3</font>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<font id="texto4">TEXTO 4</font>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<br>
+			<input id="txtEnviarMsg" type="text" placeholder="Mensagem..." />
+			<button id="btnEnviarMsg">Enviar</button>
+		</td>
+	</tr>
+	</table>
+
+
+
+
+</body>
+</html>
