@@ -25,27 +25,24 @@ function conectar(){
       //console.log(salaCode)
       //ESTAMOS ENVIANDO ESSE CÓDIGO DE SALA GERADO PRA  DENTRO DO BANCO DE DADOS
       var salaCodigo = database.ref("Salas/"+salaCode+"/usuario/"+nameVelha.value)
-      salaCodigo.set(nameVelha.value)
-
-      //IREMOS ADICIONAR UM LISTENER PRA TRANSITAR SOMENTE QUANDO O REGISTRO CHEGAR NO BANCO
-      var usuarioRef = database.ref("Salas/");
-      usuarioRef.on('child_added', function(snapshot){
-         var novoUser = snapshot.val();
-         var novoUsuarioJSON = JSON.stringify(novoUser);
-
-         //ISSO AQUI VAI DAR PAU, BASICAMENTE SÓ IREMOS TRANSITAR QUANDO ALGO
-         //FOR ADICIONADO, SE ESSA MERDA FOR ADICIONADA POR ALGUÉM DA PAU, CTZ
-
-         //ESSE CÓDIGO É RESPONSÁVEL POR TRANSITAR 
-         window.location.href = "htmlVelhaSala.html" 
-
-      })
       
-  //IREMOS SALVAR NO SessionStorage O NOME DA SALA apenas pra sessão atual na transição pra outra página
-  sessionStorage.setItem('nomeDaSala',salaCode);
+      //O CÓDIGO ABAIXO EXISTE POIS SE A PÁGINA TRANSITA
+      // ANTES DE ADICIONAR NO BANCO, ELE PARA ADIÇÃO E NÃO FUNCIONA
+      salaCodigo.set(nameVelha.value, function(error){
+         if(error){
+            console.lgo("Erro ao adicionar o dado no banco: ",error);
+         }
+         else{
+            console.log("Dados adicionados com sucesso!")
+            //IREMOS SALVAR NO SessionStorage O NOME DA SALA apenas pra sessão atual na transição pra outra página
+             sessionStorage.setItem('nomeDaSala',salaCode);
 
-  //ESSE CÓDIGO É RESPONSÁVEL POR TRANSITAR 
- // window.location.href = "htmlVelhaSala.html" 
+             //ESSE CÓDIGO É RESPONSÁVEL POR TRANSITAR 
+            window.location = "htmlVelhaSala.html" 
+
+         }
+      })
+
   
 
 
