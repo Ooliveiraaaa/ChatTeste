@@ -36,7 +36,7 @@ var mudarUsuario; //USADA PRA TIRAR O USUÁRIO DA SALA ATUAL ATÉ AQUELA DIGITAD
 var salaMudada; //USADA PRA INDICAR PRA QUAL SALA O USUÁRIO SE MOVEU
 var conversarBtn; //BOTÃO USADO PRA ENVIAR A MENSAGEM DO INPUT
 var conversartxt; //INPUT QUE IREMOS USAR PRA EXTRAIR A MENSAGEM DIGITADA
-
+var ultimoValorInseridoMensagem;
 
 //OBS: IREMOS USAR ESSA FUNÇÃO COMO PRINCIPAL - SÓ IRÁ EXECUTAR OQUE TA DENTRO
 //QUANDO A PÁGINA CARREGAR TOTALMENTE
@@ -67,6 +67,7 @@ conectarBtn.addEventListener('click',function(){
       alert("Digite um código")
    }
    else{
+
 //3) IREMOS AGORA PEGAR O USUÁRIO ATUAL E CONDUZIR ATÉ A SALA QUE ELE DIGITOU
 //OBS: É IMPORTANTE COLOCAR O SISTEMA DE QUANDO USUÁRIO SAIR EXCLUIR A ATUAL
 //E REGISTRAR NA NOVA, EVITAR ACÚMULO DESNECESSÁRIO DE REGISTROS
@@ -75,6 +76,7 @@ mudarUsuario = database.ref("Salas/"+conectarInput.value+"/usuario/"+nomeCodigo)
 
 //4) AQUI ESTAMOS SINALIZANDO EM QUAL SALA ELE SE ENCONTRA DE ACORDO COM O DIGITADO
 salaMudada.textContent = conectarInput.value
+  //conectarInput.value=""; //APÓS ADICIONAR NO TEXTO IREMOS REMOVER DO INPUT
 
 //5) IREMOS TRABALHAR COM O EVENTO DE MENSAGEM EM SÍ
 conversarBtn = document.getElementById("btnEnviarMsg");
@@ -85,49 +87,77 @@ conversarBtn.addEventListener('click',function(){
 if(conversartxt.value==""){
    alert("Campo vazio")
 }
+
 else{
 var enviarMSG = database.ref("Salas/"+conectarInput.value+"/mensagem");
+//USAMOS ISSO PRA CRIAR UM TITULO DE CHILD ALEATÓRIO
 var novoChildAleatorio = enviarMSG.push();
+//POR FIM ADICIONAMOS A ESSE TITULO O VALOR DIGITADO PELO USUÁRIO
 novoChildAleatorio.set(conversartxt.value)
-var refLer = database.ref("Salas/"+conectarInput.value+"/mensagem/");
-var registros = [] //Array pra armazenar os registros
 
-refLer.limitToLast(4).once("value")
-.then(function(snapshot){
-   snapshot.forEach(function(childSnapshot){
-      var childData = childSnapshot.val();
-      registros.push(childData);
-   });
-
-   registros.reverse();
-    var texto1 = document.getElementById("texto1");
-    var texto2 = document.getElementById("texto2");
-    var texto3 = document.getElementById("texto3");
-    var texto4 = document.getElementById("texto4");
-
-    texto1.textContent = registros[0];
-    texto2.textContent = registros[1];
-    texto3.textContent = registros[2];
-    texto4.textContent = registros[3];
-
-})
-.catch(function(error) {
-    console.error(error);
-  });
-
-setInterval(2000);
-
+// var refLer = database.ref("Salas/"+conectarInput.value+"/mensagem/");
 
 }
 
-
+//É NECESSÁRIO CRIAR UMA FUNÇÃO POIS SE NÃO NÃO CONSEGUIMOS EXECUTAR O CÓDIGO SOZINHO
+//VAI FUNCIONAR SÓ QUANDO CLICAR NO BOTÃO, ISSO NÃÓ É LEGAL
 })
+
+function texto(){
+   console.log("testei");
+
+   //1) IREMOS PEGAR A SALA EM QUE ESSE USUÁRIO SE ENCONTRA ATUAL E MANDAR LER DALI
+   // O ÚLTIMO REGISTRO
+   // DE 2 EM 2 SEGUNDOS ELE VAI NO BANCO, COLETA OS ÚLTIMOS 4 REGISTROS E DISPOEM DISSO EM 4 TEXTOS DIFERENTES
+   ultimoValorInseridoMensagem = firebase.database().ref("Salas/"+conectarInput.value+"/mensagem/");
+   ultimoValorInseridoMensagem.limitToLast(4).once('value', function(snapshot) {
+  var registros = snapshot.val();
+  var valores = Object.values(registros);
+
+  // Verificar se há pelo menos 0 registros
+  if (valores.length >= 0) {
+    var texto1 = document.getElementById('texto1');
+    var texto2 = document.getElementById('texto2');
+    var texto3 = document.getElementById('texto3');
+    var texto4 = document.getElementById('texto4');
+
+    // Atribuir os valores aos elementos no DOM
+    texto1.textContent = valores[0];
+    texto2.textContent = valores[1];
+    texto3.textContent = valores[2];
+    texto4.textContent = valores[3];
+  }
+});
+
+
+
+
+}
+setInterval(texto,2000)
+
 
 
    }
+//setInterval(executar, 2000);
 })
 
 
+
+
 })
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
+//1 ESTAMOS COM BUG DE QUANDO TIRA O TEXTO DO TEXTBOX CRASHA TUDO
+//2 O ERRO DE FICAR ENVIANDO VÁRIAS VEZES ESTÁ NO FATO DE CLICAR MAIS DE 1 VEZ NA MESMA SALA 9PROBLEMA NA LINHA 63)
+//3 HÁ UM ERRO EM QUE SE CRIAMOS SALAS NOVAS ELE FICA CRASHANDO ATÉ UMA MENSAGEM SER ENVIADA
+
+     
+
+
+
+
+
+
+
 
