@@ -13,105 +13,93 @@
 firebase.initializeApp(firebaseConfig);
 var database = firebase.database();
 
+//IREMOS RECUPERAR O CÓDIGO DA SALA ENVIADO PELA PÁGINA ANTERIOR
 var salaCodigo = sessionStorage.getItem('nomeDaSala');
-console.log(salaCodigo);
+//IREMOS RECUPERAR O NOME DE USUÁRIO ENVIADO PELA PÁGINA ANTERIOR
+var nomeCodigo = sessionStorage.getItem('nomeDoNome');
 
+
+//FUNÇÃO USADA PRA CRIAR SLEEP
 function sleep(ms){
    return new Promise(resolve=>setTimeout(resolve,ms))
 }
 
+//VARIÁVEIS
 var salaMudada2;
 var nomeUsuario = database.ref("Salas/"+salaCodigo+"/"+"usuario/");
-nomeUsuario.on('value', function(snapshot){
-   var valor = snapshot.val();
-
-   //VAMOS EXPLICAR LINHA  25,26,27 -> BASICAMENTE FICAVA RETORNANDO [Object.object] PORQUE AGORA ESTAMOS USANDO Usuário:usuário NO BANCO PRA PODER ADICIONAR MAIS 
-   // DESSA  FORMA CONVERTEMOS ISSO PRA JSON E PEGAMOS A KEY DO JSON SETANDO ISSO COMO O USUÁRIO
-  var valorJson = JSON.stringify(valor);
-  var jsonObject = JSON.parse(valorJson);
-  var keys = Object.keys(jsonObject);
-
-  console.log(keys)
-
-//IREMOS SETAR O NOME E O CÓDIGO DO USUÁRIO NA PÁGINA (VINDO DO BANCO)
-   var usuarioSala = document.getElementById("usuarioSala")
-   usuarioSala.textContent=keys
-
-   var roomCode = document.getElementById("roomCode")
-   roomCode.textContent=salaCodigo
-
-   //NO EVENTO DE  CLIQUE DO BOTÃO IREMOS PEGAR O USUÁRIO ATUAL E POR NA SALA COM OUTROS USERS
-   var submitBtn = document.getElementById("pesquisar")
-   var submitInput = document.getElementById("typeCode")
-    var salaMudada = document.getElementById("salamudada");
-   submitBtn.addEventListener('click', function(){
-
-      if(submitInput.value==""){
-         alert("Digite um código")
-      }
-      else{
-         keys = ""+keys; //CONVERTER O NOME EM STRING 
-         //IREMOS AGORA PEGAR O USUÁRIO ATUAL E CONDUZIR ATÉ A SALA RESPECTIVA COM OUTROS MAIS
-         var mudarUsuario = database.ref("Salas/" + submitInput.value + "/usuario/"+keys).set(keys);
-        // mudarUsuario.set(true)
-        //ANTES DE MUDAR DE FATO O USUÁRIO, VAMOS MOSTRAR EM QUAL SALA ELE irá se ENCONTRAr
-        
-       
-        salaMudada.textContent=submitInput.value
-        //SAIU DE UMA SALA O USUÁRIO É DELETADO DO ATUAL E INCLUIDO NO OUTRO
-
-        //ISSO NÃO CONSEGUIMOS FAZER, VOLTAR DPS PORQUE VAI DAR ERRO
-
-      }
+var nomeUsuarioHTML;
+var nomeSalaHTML;
+var conectarBtn;
+var conectarInput;
+var conectarSalaDigitada;
+var mudarUsuario; //USADA PRA TIRAR O USUÁRIO DA SALA ATUAL ATÉ AQUELA DIGITADA
+var salaMudada; //USADA PRA INDICAR PRA QUAL SALA O USUÁRIO SE MOVEU
+var conversarBtn; //BOTÃO USADO PRA ENVIAR A MENSAGEM DO INPUT
+var conversartxt; //INPUT QUE IREMOS USAR PRA EXTRAIR A MENSAGEM DIGITADA
 
 
-   })
+//OBS: IREMOS USAR ESSA FUNÇÃO COMO PRINCIPAL - SÓ IRÁ EXECUTAR OQUE TA DENTRO
+//QUANDO A PÁGINA CARREGAR TOTALMENTE
+document.addEventListener('DOMContentLoaded', function(){
+//1) IREMOS PUXAR OS DADOS SALVOS NA PÁGINA E SETAR NO USUÁRIO E CÓDIGO DE SALA
+      nomeUsuarioHTML = document.getElementById("usuarioSala");
+      nomeSalaHTML = document.getElementById("roomCode");
+      salaMudada = document.getElementById("salamudada");
 
-
-var conversarBtn = document.getElementById("btnEnviarMsg");
-var conversartxt = document.getElementById("txtEnviarMsg");
-
-conversarBtn.addEventListener('click',function(){
-   var valorTXT = conversartxt.value
-   if(valorTXT==""){
-      alert("Campo vazio")
+   if(nomeUsuarioHTML&&nomeSalaHTML){
+      nomeSalaHTML.textContent=salaCodigo;
+      nomeUsuarioHTML.textContent=nomeCodigo;
+      //OBS: ACHO QUE DEVEMOS POR O CÓDIGO DENTRO DESSE IF
+      //POIS SE NÃO ENCONTRAR USUÁRIO OU SALA NÃO TEM OQUE FAZER...
    }
    else{
-      salaMudada2 = salaMudada.innerHTML
-      var enviarMSG = database.ref("Salas/"+salaMudada2+"/mensagem");
-      var novoChild = enviarMSG.push();
-      novoChild.set(valorTXT)
-
-
-
-     var refLer = database.ref("Salas/"+salaMudada2+"/mensagem/");
-      
-
-        //IREMOS FAZER UM SISTEMA PRA FICAR LENDO TODA HORA OQ É ESCRITO 
-        //E EXIBIR ISSO PRO USUÁRIO
-         
-      
-
-
+      console.error("Usuário ou Sala não encontrada")
    }
 
 
-})
+//2) IREMOS PEGAR O EVENTO DE CLIQUE DO BOTÃO "CONECTAR"
+//   IREMOS COLETAR O EVENTO DE CLIQUE, O DIGITADO NO INPUT
+conectarBtn = document.getElementById("conectar");
+conectarInput = document.getElementById("typeCode");
 
+conectarBtn.addEventListener('click',function(){
+   if(conectarInput.value==""){
+      alert("Digite um código")
+   }
+   else{
+//3) IREMOS AGORA PEGAR O USUÁRIO ATUAL E CONDUZIR ATÉ A SALA QUE ELE DIGITOU
+//OBS: É IMPORTANTE COLOCAR O SISTEMA DE QUANDO USUÁRIO SAIR EXCLUIR A ATUAL
+//E REGISTRAR NA NOVA, EVITAR ACÚMULO DESNECESSÁRIO DE REGISTROS
+conectarSalaDigitada = conectarInput.value;
+mudarUsuario = database.ref("Salas/"+conectarInput.value+"/usuario/"+nomeCodigo).set(nomeCodigo);
 
- function executar(){
-         var refLer = database.ref("Salas/" + salaMudada2 + "/mensagem/");
-var registros = []; // Array para armazenar os registros
+//4) AQUI ESTAMOS SINALIZANDO EM QUAL SALA ELE SE ENCONTRA DE ACORDO COM O DIGITADO
+salaMudada.textContent = conectarInput.value
+
+//5) IREMOS TRABALHAR COM O EVENTO DE MENSAGEM EM SÍ
+conversarBtn = document.getElementById("btnEnviarMsg");
+conversartxt = document.getElementById("txtEnviarMsg");
+
+//6) EVENTO DE CLIQUE DO BOTÃO ENVIAR
+conversarBtn.addEventListener('click',function(){
+if(conversartxt.value==""){
+   alert("Campo vazio")
+}
+else{
+var enviarMSG = database.ref("Salas/"+conectarInput.value+"/mensagem");
+var novoChildAleatorio = enviarMSG.push();
+novoChildAleatorio.set(conversartxt.value)
+var refLer = database.ref("Salas/"+conectarInput.value+"/mensagem/");
+var registros = [] //Array pra armazenar os registros
 
 refLer.limitToLast(4).once("value")
-  .then(function(snapshot) {
-    snapshot.forEach(function(childSnapshot) {
+.then(function(snapshot){
+   snapshot.forEach(function(childSnapshot){
       var childData = childSnapshot.val();
       registros.push(childData);
-    });
+   });
 
-    registros.reverse(); // Inverter a ordem dos registros para exibir os mais recentes primeiro
-
+   registros.reverse();
     var texto1 = document.getElementById("texto1");
     var texto2 = document.getElementById("texto2");
     var texto3 = document.getElementById("texto3");
@@ -121,17 +109,25 @@ refLer.limitToLast(4).once("value")
     texto2.textContent = registros[1];
     texto3.textContent = registros[2];
     texto4.textContent = registros[3];
-  })
-  .catch(function(error) {
+
+})
+.catch(function(error) {
     console.error(error);
   });
-       }
-setInterval(executar, 2000);
-     
+
+setInterval(2000);
+
+
+}
+
 
 })
 
 
+   }
+})
 
 
+})
+/////////////////////////////////////////////////////////////////////////////////////////////////
 

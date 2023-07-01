@@ -24,6 +24,7 @@ function conectar(){
 
       //console.log(salaCode)
       //ESTAMOS ENVIANDO ESSE CÓDIGO DE SALA GERADO PRA  DENTRO DO BANCO DE DADOS
+      //ESSE ENVIO ESTÁ ACOMPANHADO DO NOME DO USUÁRIO JÁ DENTRO DA FUNÇÃO
       var salaCodigo = database.ref("Salas/"+salaCode+"/usuario/"+nameVelha.value)
       
       //O CÓDIGO ABAIXO EXISTE POIS SE A PÁGINA TRANSITA
@@ -36,6 +37,7 @@ function conectar(){
             console.log("Dados adicionados com sucesso!")
             //IREMOS SALVAR NO SessionStorage O NOME DA SALA apenas pra sessão atual na transição pra outra página
              sessionStorage.setItem('nomeDaSala',salaCode);
+             sessionStorage.setItem('nomeDoNome',nameVelha.value);
 
              //ESSE CÓDIGO É RESPONSÁVEL POR TRANSITAR 
             window.location = "htmlVelhaSala.html" 
