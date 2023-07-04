@@ -1,4 +1,3 @@
-
  const firebaseConfig = {
     apiKey: "AIzaSyBOqgBSihK_RRjoctF4EI9y6nt4AMIycq4",
     authDomain: "javascripttestes-7480b.firebaseapp.com",
@@ -37,6 +36,10 @@ var salaMudada; //USADA PRA INDICAR PRA QUAL SALA O USUÁRIO SE MOVEU
 var conversarBtn; //BOTÃO USADO PRA ENVIAR A MENSAGEM DO INPUT
 var conversartxt; //INPUT QUE IREMOS USAR PRA EXTRAIR A MENSAGEM DIGITADA
 var ultimoValorInseridoMensagem;
+var codigoSalaMudada; //IREMOS PEGAR A SALA QUE O USUÁRIO TRANSITOU PRA POR NO DIRETÓRIO DE ENVIAR MENSAGEM
+
+
+
 
 //OBS: IREMOS USAR ESSA FUNÇÃO COMO PRINCIPAL - SÓ IRÁ EXECUTAR OQUE TA DENTRO
 //QUANDO A PÁGINA CARREGAR TOTALMENTE
@@ -55,7 +58,8 @@ document.addEventListener('DOMContentLoaded', function(){
    else{
       console.error("Usuário ou Sala não encontrada")
    }
-
+//IREMOS USAR ESSA codigoSalaMudada PRA SEMPRE ENVIAR PRA SALA QUE ESTÁ MARCADA COMO ATUAL
+codigoSalaMudada = document.getElementById("roomCode");
 
 //2) IREMOS PEGAR O EVENTO DE CLIQUE DO BOTÃO "CONECTAR"
 //   IREMOS COLETAR O EVENTO DE CLIQUE, O DIGITADO NO INPUT
@@ -63,11 +67,13 @@ conectarBtn = document.getElementById("conectar");
 conectarInput = document.getElementById("typeCode");
 
 conectarBtn.addEventListener('click',function(){
+  //alert(conectarInput.value)
    if(conectarInput.value==""){
       alert("Digite um código")
    }
    else{
-
+//alert(conectarInput.value)
+//alert(conectarSalaDigitada.textContext)
 //3) IREMOS AGORA PEGAR O USUÁRIO ATUAL E CONDUZIR ATÉ A SALA QUE ELE DIGITOU
 //OBS: É IMPORTANTE COLOCAR O SISTEMA DE QUANDO USUÁRIO SAIR EXCLUIR A ATUAL
 //E REGISTRAR NA NOVA, EVITAR ACÚMULO DESNECESSÁRIO DE REGISTROS
@@ -89,7 +95,7 @@ if(conversartxt.value==""){
 }
 
 else{
-var enviarMSG = database.ref("Salas/"+conectarInput.value+"/mensagem");
+var enviarMSG = database.ref("Salas/"+codigoSalaMudada.textContent+"/mensagem");
 //USAMOS ISSO PRA CRIAR UM TITULO DE CHILD ALEATÓRIO
 var novoChildAleatorio = enviarMSG.push();
 //POR FIM ADICIONAMOS A ESSE TITULO O VALOR DIGITADO PELO USUÁRIO
@@ -104,17 +110,19 @@ novoChildAleatorio.set(conversartxt.value)
 })
 
 function texto(){
-   console.log("testei");
+   
 
    //1) IREMOS PEGAR A SALA EM QUE ESSE USUÁRIO SE ENCONTRA ATUAL E MANDAR LER DALI
    // O ÚLTIMO REGISTRO
    // DE 2 EM 2 SEGUNDOS ELE VAI NO BANCO, COLETA OS ÚLTIMOS 4 REGISTROS E DISPOEM DISSO EM 4 TEXTOS DIFERENTES
-   ultimoValorInseridoMensagem = firebase.database().ref("Salas/"+conectarInput.value+"/mensagem/");
+   ultimoValorInseridoMensagem = firebase.database().ref("Salas/"+codigoSalaMudada.textContent+"/mensagem/");
    ultimoValorInseridoMensagem.limitToLast(4).once('value', function(snapshot) {
   var registros = snapshot.val();
-  var valores = Object.values(registros);
+  
 
-  // Verificar se há pelo menos 0 registros
+  if(registros &&typeof registros==='object'){
+  var valores = Object.values(registros);
+    // Verificar se há pelo menos 0 registros
   if (valores.length >= 0) {
     var texto1 = document.getElementById('texto1');
     var texto2 = document.getElementById('texto2');
@@ -127,6 +135,14 @@ function texto(){
     texto3.textContent = valores[2];
     texto4.textContent = valores[3];
   }
+  }
+  else{
+
+console.log("Nenhuma mensagem encontrada")
+
+
+}
+
 });
 
 
@@ -148,10 +164,11 @@ setInterval(texto,2000)
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-//1 ESTAMOS COM BUG DE QUANDO TIRA O TEXTO DO TEXTBOX CRASHA TUDO
+//1 ESTAMOS COM BUG DE QUANDO TIRA O TEXTO DO TEXTBOX CRASHA TUDO - RESOLVIDO
 //2 O ERRO DE FICAR ENVIANDO VÁRIAS VEZES ESTÁ NO FATO DE CLICAR MAIS DE 1 VEZ NA MESMA SALA 9PROBLEMA NA LINHA 63)
-//3 HÁ UM ERRO EM QUE SE CRIAMOS SALAS NOVAS ELE FICA CRASHANDO ATÉ UMA MENSAGEM SER ENVIADA
-
+//3 HÁ UM ERRO EM QUE SE CRIAMOS SALAS NOVAS ELE FICA CRASHANDO ATÉ UMA MENSAGEM SER ENVIADA - RESOLVIDO
+//4 PARA NÃO SOBRECARREGAR É LEGAL DEIXARMOS UM LIMITE DE REGISTRO NO BANCO, ENTÃO JÁ QUE SÓ EXIBE 4 CAMPOS ENTÃO POR QUE MOSTRAR MAIS QUE ISSO...
+//5 ACHAR UM JEITO DE QUANDO USUARIO IR PRA UMA SALA SER EXCLUIDA DA ANTERIOR
      
 
 
